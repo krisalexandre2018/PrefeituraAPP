@@ -1,8 +1,22 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ALTERE AQUI PARA O IP DO SEU COMPUTADOR OU URL DA API
-const API_URL = 'http://192.168.2.104:3000/api';
+// ============================================
+// CONFIGURAÇÃO DE AMBIENTE
+// ============================================
+// Mude para 'production' para usar a API do Render
+// Mude para 'development' para usar a API local
+const ENVIRONMENT = 'production'; // 'development' | 'production'
+
+const API_URLS = {
+  development: 'http://192.168.2.104:3000/api', // IP local - ajuste conforme necessário
+  production: 'https://vereadores-api.onrender.com/api' // API em produção no Render
+};
+
+const API_URL = API_URLS[ENVIRONMENT];
+
+console.log(`📡 API conectada em: ${API_URL} (${ENVIRONMENT})`);
+// ============================================
 
 // Callback para notificar quando usuário não está autenticado
 let onUnauthorizedCallback = null;
