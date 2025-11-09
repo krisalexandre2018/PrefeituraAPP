@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-11-02T23:23:55.140Z",
+  "totalAgents": 2,
+  "success": 2,
+  "warnings": 0,
+  "errors": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "name": "ArquitetoSistema",
+      "status": "SUCCESS",
+      "code": 0
+    },
+    {
+      "name": "BackendEngineer",
+      "status": "SUCCESS",
+      "code": 0
+    }
+  ]
+}

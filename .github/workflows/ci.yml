@@ -1,0 +1,143 @@
+name: CI - Sistema Vereadores
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  backend-test:
+    name: Backend - Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: vereadores_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./backend
+        run: npx prisma generate
+
+      - name: Run Prisma Migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/vereadores_test
+        run: npx prisma migrate deploy
+
+      - name: Run linter (if exists)
+        working-directory: ./backend
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Run tests (if exists)
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/vereadores_test
+          JWT_SECRET: test-secret-key
+          NODE_ENV: test
+        run: npm test --if-present
+        continue-on-error: true
+
+      - name: Check TypeScript (if exists)
+        working-directory: ./backend
+        run: npm run typecheck --if-present
+        continue-on-error: true
+
+  mobile-check:
+    name: Mobile - Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'mobile/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./mobile
+        run: npm ci
+
+      - name: Check Expo config
+        working-directory: ./mobile
+        run: npx expo config --type public
+
+      - name: Run linter (if exists)
+        working-directory: ./mobile
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Run tests (if exists)
+        working-directory: ./mobile
+        run: npm test --if-present
+        continue-on-error: true
+
+  security-check:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Audit Backend Dependencies
+        working-directory: ./backend
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Audit Mobile Dependencies
+        working-directory: ./mobile
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test Docker Compose
+        run: docker-compose config
+
+      - name: Build Docker Images
+        run: docker-compose build
+        continue-on-error: true

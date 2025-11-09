@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-11-02T23:23:55.130Z",
+  "status": "OK",
+  "files": {
+    "auth.controller.js": {
+      "exists": true,
+      "functions": 0
+    },
+    "ocorrencia.controller.js": {
+      "exists": true,
+      "functions": 1
+    },
+    "user.controller.js": {
+      "exists": true,
+      "functions": 1
+    },
+    "notificacao.controller.js": {
+      "exists": true,
+      "functions": 1
+    },
+    "auth.routes.js": {
+      "exists": true,
+      "routes": 7
+    },
+    "ocorrencia.routes.js": {
+      "exists": true,
+      "routes": 6
+    },
+    "user.routes.js": {
+      "exists": true,
+      "routes": 10
+    },
+    "notificacao.routes.js": {
+      "exists": true,
+      "routes": 9
+    },
+    "email.service.js": {
+      "exists": true
+    },
+    "upload.service.js": {
+      "exists": true
+    }
+  },
+  "issues": []
+}

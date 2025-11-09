@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  ADMIN
+  VEREADOR
+  JURIDICO
+}
+
+enum UserStatus {
+  PENDENTE
+  ATIVO
+  INATIVO
+}
+
+enum OcorrenciaStatus {
+  PENDENTE
+  EM_ANALISE
+  RESOLVIDO
+  REJEITADO
+}
+
+enum Prioridade {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+enum Categoria {
+  INFRAESTRUTURA
+  ILUMINACAO
+  LIMPEZA
+  SAUDE
+  EDUCACAO
+  SEGURANCA
+  TRANSPORTE
+  MEIO_AMBIENTE
+  OUTROS
+}
+
+model User {
+  id            String       @id @default(uuid())
+  nome          String
+  cpf           String       @unique
+  email         String       @unique
+  senha         String
+  tipo          UserType     @default(VEREADOR)
+  status        UserStatus   @default(PENDENTE)
+  isSuperAdmin  Boolean      @default(false)
+  telefone      String?
+  fotoPerfil    String?
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relações
+  ocorrencias   Ocorrencia[] @relation("VereadorOcorrencias")
+  historicos    Historico[]
+  notificacoes  Notificacao[]
+
+  @@index([tipo])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Ocorrencia {
+  id          String            @id @default(uuid())
+  vereadorId  String
+  titulo      String
+  descricao   String
+  categoria   Categoria         @default(OUTROS)
+  endereco    String
+  latitude    Float?
+  longitude   Float?
+  status      OcorrenciaStatus  @default(PENDENTE)
+  prioridade  Prioridade        @default(MEDIA)
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Relações
+  vereador    User              @relation("VereadorOcorrencias", fields: [vereadorId], references: [id])
+  fotos       Foto[]
+  historicos  Historico[]
+
+  @@index([vereadorId])
+  @@index([status])
+  @@index([categoria])
+  @@index([prioridade])
+  @@index([createdAt])
+  @@map("ocorrencias")
+}
+
+model Foto {
+  id            String      @id @default(uuid())
+  ocorrenciaId  String
+  urlFoto       String
+  thumbnailUrl  String?
+  ordem         Int         @default(0)
+
+  createdAt     DateTime    @default(now())
+
+  // Relações
+  ocorrencia    Ocorrencia  @relation(fields: [ocorrenciaId], references: [id], onDelete: Cascade)
+
+  @@index([ocorrenciaId])
+  @@map("fotos")
+}
+
+model Historico {
+  id            String      @id @default(uuid())
+  ocorrenciaId  String
+  usuarioId     String
+  acao          String
+  comentario    String?
+
+  createdAt     DateTime    @default(now())
+
+  // Relações
+  ocorrencia    Ocorrencia  @relation(fields: [ocorrenciaId], references: [id], onDelete: Cascade)
+  usuario       User        @relation(fields: [usuarioId], references: [id])
+
+  @@index([ocorrenciaId])
+  @@index([usuarioId])
+  @@index([createdAt])
+  @@map("historicos")
+}
+
+model Notificacao {
+  id        String    @id @default(uuid())
+  usuarioId String
+  tipo      String
+  titulo    String
+  mensagem  String
+  lida      Boolean   @default(false)
+
+  createdAt DateTime  @default(now())
+
+  // Relações
+  usuario   User      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([lida])
+  @@index([createdAt])
+  @@map("notificacoes")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique
+  expiresAt DateTime
+
+  createdAt DateTime  @default(now())
+
+  @@map("password_resets")
+}

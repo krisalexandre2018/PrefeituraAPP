@@ -1,0 +1,2 @@
+# Esta pasta está reservada para modelos personalizados
+# Atualmente o Prisma gerencia todos os modelos via schema.prisma

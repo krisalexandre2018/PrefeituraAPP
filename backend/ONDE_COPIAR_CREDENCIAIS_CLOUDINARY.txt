@@ -1,0 +1,200 @@
+═══════════════════════════════════════════════════════════════════
+  ONDE COPIAR AS CREDENCIAIS DO CLOUDINARY - GUIA VISUAL
+═══════════════════════════════════════════════════════════════════
+
+🌐 PASSO 1: ACESSAR O DASHBOARD
+────────────────────────────────────────────────────────────────────
+URL: https://cloudinary.com/console
+
+1. Faça login na sua conta Cloudinary
+2. Você será redirecionado para a página inicial (Dashboard)
+
+
+📋 PASSO 2: LOCALIZAR AS CREDENCIAIS
+────────────────────────────────────────────────────────────────────
+
+Na página inicial, procure por um painel/card chamado:
+
+   ╔═══════════════════════════════════════════════════════╗
+   ║  Product Environment Credentials                      ║
+   ║                                                       ║
+   ║  Cloud name                                           ║
+   ║  ┌─────────────────────────────────────┐             ║
+   ║  │ doalug1yw                            │ 📋 [Copy]  ║
+   ║  └─────────────────────────────────────┘             ║
+   ║                                                       ║
+   ║  API Key                                              ║
+   ║  ┌─────────────────────────────────────┐             ║
+   ║  │ 533288437919467                      │ 📋 [Copy]  ║
+   ║  └─────────────────────────────────────┘             ║
+   ║                                                       ║
+   ║  API Secret                                           ║
+   ║  ┌─────────────────────────────────────┐             ║
+   ║  │ ************************  👁️ [Show]  │ 📋 [Copy]  ║
+   ║  └─────────────────────────────────────┘             ║
+   ║                                                       ║
+   ║  Environment variable                                 ║
+   ║  CLOUDINARY_URL=cloudinary://...                     ║
+   ╚═══════════════════════════════════════════════════════╝
+
+
+✅ PASSO 3: COPIAR CADA CREDENCIAL
+────────────────────────────────────────────────────────────────────
+
+Cloud name:
+-----------
+1. Clique no botão [Copy] ao lado de "Cloud name"
+2. OU: Selecione o texto "doalug1yw" e copie (Ctrl+C)
+
+   Deve copiar: doalug1yw
+
+
+API Key:
+--------
+1. Clique no botão [Copy] ao lado de "API Key"
+2. OU: Selecione o número inteiro e copie (Ctrl+C)
+
+   Deve copiar algo como: 533288437919467
+
+
+API Secret (IMPORTANTE):
+------------------------
+1. PRIMEIRO: Clique no ícone 👁️ [Show] ou [Reveal API Secret]
+   - O campo vai mostrar o valor real em vez de asteriscos
+
+2. DEPOIS: Clique no botão [Copy] ao lado de "API Secret"
+   - OU: Selecione TODO o texto revelado e copie (Ctrl+C)
+
+   ⚠️ ATENÇÃO:
+   - Copie o valor COMPLETO (pode ter 20-50 caracteres)
+   - Não deixe espaços no início ou fim
+   - Geralmente tem letras maiúsculas, minúsculas e números
+
+   Exemplo de formato: AbC12xYz34PqR56sT0uvWxYz789
+
+
+🔧 PASSO 4: COLAR NO ARQUIVO .env
+────────────────────────────────────────────────────────────────────
+
+1. Abra o arquivo: backend\.env
+
+2. Localize as linhas (20-22):
+
+   CLOUDINARY_CLOUD_NAME=doalug1yw
+   CLOUDINARY_API_KEY=533288437919467
+   CLOUDINARY_API_SECRET=YIZkM38W0PamVsNKEWpC6EcLhAE
+
+3. Substitua pelos valores copiados:
+
+   CLOUDINARY_CLOUD_NAME=<cole_cloud_name_aqui>
+   CLOUDINARY_API_KEY=<cole_api_key_aqui>
+   CLOUDINARY_API_SECRET=<cole_api_secret_aqui>
+
+4. IMPORTANTE - FORMATO CORRETO:
+
+   ✅ CERTO:
+   CLOUDINARY_API_SECRET=AbC12xYz34PqR56sT0uvWxYz789
+
+   ❌ ERRADO (com aspas):
+   CLOUDINARY_API_SECRET="AbC12xYz34PqR56sT0uvWxYz789"
+
+   ❌ ERRADO (com espaço):
+   CLOUDINARY_API_SECRET= AbC12xYz34PqR56sT0uvWxYz789
+
+   ❌ ERRADO (com espaço no final):
+   CLOUDINARY_API_SECRET=AbC12xYz34PqR56sT0uvWxYz789
+
+5. Salve o arquivo (Ctrl+S)
+
+
+🔄 PASSO 5: REINICIAR O BACKEND
+────────────────────────────────────────────────────────────────────
+
+1. Vá ao terminal onde o backend está rodando
+
+2. Pare o servidor:
+   - Pressione: Ctrl+C
+
+3. Inicie novamente:
+   cd "E:\Todos os projetos\Prefeitura App\backend"
+   npm run dev
+
+4. Aguarde a mensagem de confirmação
+
+
+✔️ PASSO 6: VALIDAR
+────────────────────────────────────────────────────────────────────
+
+Execute o teste:
+
+   cd "E:\Todos os projetos\Prefeitura App\backend"
+   node test-cloudinary.js
+
+Resultado esperado:
+
+   ✅ SUCESSO! Credenciais estão corretas!
+
+
+═══════════════════════════════════════════════════════════════════
+  PERGUNTAS FREQUENTES
+═══════════════════════════════════════════════════════════════════
+
+❓ "Não vejo o painel de credenciais"
+───────────────────────────────────────────────────────────────────
+- Certifique-se de estar na página inicial (Dashboard)
+- Pode estar mais abaixo na página, role até encontrar
+- Procure por "Product Environment Credentials" ou "Account Details"
+
+
+❓ "Não consigo revelar o API Secret"
+───────────────────────────────────────────────────────────────────
+- Clique no ícone de olho (👁️) ao lado do campo
+- Ou clique em "Show" / "Reveal API Secret"
+- Se não funcionar, tente atualizar a página
+
+
+❓ "Copiou espaços antes ou depois do valor"
+───────────────────────────────────────────────────────────────────
+No arquivo .env, delete a linha inteira e digite novamente:
+
+1. Delete: CLOUDINARY_API_SECRET=YIZkM38W0PamVsNKEWpC6EcLhAE
+2. Digite: CLOUDINARY_API_SECRET=
+3. Cole o valor (Ctrl+V)
+4. NÃO pressione espaço
+5. Salve (Ctrl+S)
+
+
+❓ "Tenho múltiplas contas Cloudinary"
+───────────────────────────────────────────────────────────────────
+- Verifique se está logado na conta correta
+- O Cloud Name deve ser: doalug1yw
+- Se não aparecer esse nome, você está na conta errada
+
+
+❓ "API Secret tem quantos caracteres?"
+───────────────────────────────────────────────────────────────────
+- Geralmente entre 20-50 caracteres
+- O atual no .env tem 27 caracteres (YIZkM...)
+- Se o seu for diferente, está incorreto
+
+
+═══════════════════════════════════════════════════════════════════
+  EXEMPLO COMPLETO (NÃO COPIE ESTES VALORES)
+═══════════════════════════════════════════════════════════════════
+
+Estes são apenas exemplos de formato. USE OS VALORES DO SEU DASHBOARD!
+
+CLOUDINARY_CLOUD_NAME=doalug1yw
+CLOUDINARY_API_KEY=533288437919467
+CLOUDINARY_API_SECRET=AbC123xYz456PqR789sT0uvWxYzAbC123
+
+
+═══════════════════════════════════════════════════════════════════
+
+Depois de seguir todos os passos, execute:
+
+   node test-cloudinary.js
+
+Se aparecer ✅ SUCESSO, está tudo certo!
+
+═══════════════════════════════════════════════════════════════════

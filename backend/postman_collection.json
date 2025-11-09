@@ -1,0 +1,598 @@
+{
+  "info": {
+    "name": "Sistema de Ocorrências Urbanas - Vereadores",
+    "description": "API completa para sistema de ocorrências urbanas com autenticação JWT e upload de imagens",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ocorrencia_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Registrar Vereador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has user object', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('user');",
+                  "    pm.expect(jsonData.user).to.have.property('id');",
+                  "    pm.expect(jsonData.user.status).to.eql('PENDENTE');",
+                  "});",
+                  "",
+                  "pm.test('Message contains success text', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('Cadastro realizado');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"cpf\": \"12345678901\",\n  \"email\": \"joao.silva@example.com\",\n  \"senha\": \"senha123\",\n  \"telefone\": \"11999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registra um novo vereador no sistema. Status inicial: PENDENTE (aguarda aprovação do admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has token', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData).to.have.property('user');",
+                  "    ",
+                  "    // Salvar token e user_id nas variáveis",
+                  "    pm.collectionVariables.set('auth_token', jsonData.token);",
+                  "    pm.collectionVariables.set('user_id', jsonData.user.id);",
+                  "});",
+                  "",
+                  "pm.test('User has correct properties', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.user).to.have.property('email');",
+                  "    pm.expect(jsonData.user).to.have.property('tipo');",
+                  "    pm.expect(jsonData.user).to.not.have.property('senha');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao.silva@example.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Autentica usuário e retorna JWT token. Apenas usuários ATIVO podem fazer login."
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Dados do Usuário Logado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('nome');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "    pm.expect(jsonData).to.not.have.property('senha');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Retorna dados do usuário autenticado (baseado no token JWT)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticação e registro de usuários"
+    },
+    {
+      "name": "Ocorrências",
+      "item": [
+        {
+          "name": "Criar Ocorrência (sem fotos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Ocorrência criada com sucesso', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.titulo).to.eql('Buraco na Rua Principal');",
+                  "    pm.expect(jsonData.status).to.eql('PENDENTE');",
+                  "    ",
+                  "    pm.collectionVariables.set('ocorrencia_id', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Buraco na Rua Principal\",\n  \"descricao\": \"Grande buraco na rua principal, próximo ao número 123. Risco de acidentes.\",\n  \"categoria\": \"INFRAESTRUTURA\",\n  \"endereco\": \"Rua Principal, 123 - Centro\",\n  \"latitude\": \"-23.550520\",\n  \"longitude\": \"-46.633309\",\n  \"prioridade\": \"ALTA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ocorrencias",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias"]
+            },
+            "description": "Cria nova ocorrência (apenas vereadores). Status inicial: PENDENTE"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Ocorrência (com fotos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Fotos foram salvas', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('fotos');",
+                  "    pm.expect(jsonData.fotos).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "titulo",
+                  "value": "Iluminação queimada",
+                  "type": "text"
+                },
+                {
+                  "key": "descricao",
+                  "value": "Poste de iluminação queimado há 3 dias",
+                  "type": "text"
+                },
+                {
+                  "key": "categoria",
+                  "value": "ILUMINACAO",
+                  "type": "text"
+                },
+                {
+                  "key": "endereco",
+                  "value": "Rua das Flores, 456",
+                  "type": "text"
+                },
+                {
+                  "key": "prioridade",
+                  "value": "MEDIA",
+                  "type": "text"
+                },
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": [],
+                  "description": "Selecione até 5 imagens"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/ocorrencias",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias"]
+            },
+            "description": "Cria ocorrência com upload de fotos (máximo 5, até 5MB cada)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Ocorrências",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('ocorrencias');",
+                  "    pm.expect(jsonData).to.have.property('pagination');",
+                  "    pm.expect(jsonData.pagination).to.have.property('total');",
+                  "    pm.expect(jsonData.pagination).to.have.property('pages');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "PENDENTE",
+                  "disabled": true
+                },
+                {
+                  "key": "categoria",
+                  "value": "INFRAESTRUTURA",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista ocorrências com paginação e filtros. Vereadores veem apenas suas ocorrências."
+          },
+          "response": []
+        },
+        {
+          "name": "Obter Detalhes da Ocorrência",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has complete data', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('fotos');",
+                  "    pm.expect(jsonData).to.have.property('vereador');",
+                  "    pm.expect(jsonData).to.have.property('historicos');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/{{ocorrencia_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias", "{{ocorrencia_id}}"]
+            },
+            "description": "Retorna detalhes completos de uma ocorrência (fotos, vereador, histórico)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Status (Jurídico/Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Status foi atualizado', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EM_ANALISE\",\n  \"comentario\": \"Iniciamos a análise da ocorrência\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/{{ocorrencia_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias", "{{ocorrencia_id}}", "status"]
+            },
+            "description": "Atualiza status da ocorrência. Apenas jurídico e admin. Cria notificação para o vereador."
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Ocorrência",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Success message', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.include('deletada');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/{{ocorrencia_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias", "{{ocorrencia_id}}"]
+            },
+            "description": "Deleta ocorrência. Vereador só pode deletar próprias ocorrências PENDENTES."
+          },
+          "response": []
+        },
+        {
+          "name": "Estatísticas (Admin/Jurídico)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has statistics', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('total');",
+                  "    pm.expect(jsonData).to.have.property('pendentes');",
+                  "    pm.expect(jsonData).to.have.property('emAnalise');",
+                  "    pm.expect(jsonData).to.have.property('resolvidas');",
+                  "    pm.expect(jsonData).to.have.property('porCategoria');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ocorrencias/stats",
+              "host": ["{{base_url}}"],
+              "path": ["ocorrencias", "stats"]
+            },
+            "description": "Retorna estatísticas das ocorrências (apenas admin e jurídico)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar ocorrências urbanas"
+    },
+    {
+      "name": "Usuários (Admin)",
+      "item": [
+        {
+          "name": "Listar Usuários",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?status=PENDENTE",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDENTE"
+                }
+              ]
+            },
+            "description": "Lista usuários com filtro por status (apenas admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Aprovar Usuário",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ATIVO\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:userId/status",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":userId", "status"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}"
+                }
+              ]
+            },
+            "description": "Aprova cadastro de usuário (apenas admin)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notificações",
+      "item": [
+        {
+          "name": "Listar Notificações",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notificacoes",
+              "host": ["{{base_url}}"],
+              "path": ["notificacoes"]
+            },
+            "description": "Lista notificações do usuário logado"
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar como Lida",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notificacoes/:notifId/read",
+              "host": ["{{base_url}}"],
+              "path": ["notificacoes", ":notifId", "read"],
+              "variable": [
+                {
+                  "key": "notifId",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Marca notificação como lida"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
