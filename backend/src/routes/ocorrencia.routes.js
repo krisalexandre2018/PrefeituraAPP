@@ -25,11 +25,9 @@ const upload = multer({
 // Todas as rotas requerem autenticação
 router.use(authMiddleware);
 
-// CSRF protection em rotas de modificação (POST, PATCH, DELETE)
-router.use(csrfProtection);
-
 // Criar nova ocorrência (apenas vereadores)
-router.post('/', upload.array('fotos', 5), [
+// CSRF protection aplicado apenas em rotas de modificação
+router.post('/', csrfProtection, upload.array('fotos', 5), [
   body('titulo').trim().notEmpty().withMessage('Título é obrigatório').isLength({ max: 200 }).withMessage('Título muito longo'),
   body('descricao').trim().notEmpty().withMessage('Descrição é obrigatória'),
   body('categoria').optional().isIn(['INFRAESTRUTURA', 'ILUMINACAO', 'LIMPEZA', 'SAUDE', 'EDUCACAO', 'SEGURANCA', 'TRANSPORTE', 'MEIO_AMBIENTE', 'OUTROS']).withMessage('Categoria inválida'),
@@ -49,12 +47,12 @@ router.get('/stats', isJuridicoOrAdmin, ocorrenciaController.getStats);
 router.get('/:id', ocorrenciaController.getById);
 
 // Atualizar status (apenas jurídico e admin)
-router.patch('/:id/status', isJuridicoOrAdmin, [
+router.patch('/:id/status', isJuridicoOrAdmin, csrfProtection, [
   body('status').isIn(['EM_ANALISE', 'RESOLVIDO', 'REJEITADO']).withMessage('Status inválido'),
   body('comentario').optional().trim()
 ], ocorrenciaController.updateStatus);
 
 // Deletar ocorrência
-router.delete('/:id', ocorrenciaController.delete);
+router.delete('/:id', csrfProtection, ocorrenciaController.delete);
 
 module.exports = router;

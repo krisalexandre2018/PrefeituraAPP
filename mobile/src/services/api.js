@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const ENVIRONMENT = 'production'; // 'development' | 'production'
 
 const API_URLS = {
-  development: 'http://192.168.2.104:3000/api', // IP local - ajuste conforme necessário
+  development: 'http://192.168.2.104:8080/api', // IP local - ajuste conforme necessário
   production: 'https://vereadores-api.onrender.com/api' // API em produção no Render
 };
 
@@ -27,7 +27,7 @@ export const setUnauthorizedCallback = (callback) => {
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 30000,
+  timeout: 90000, // 90 segundos para aguardar API acordar no Render Free
   headers: {
     'Content-Type': 'application/json'
   }

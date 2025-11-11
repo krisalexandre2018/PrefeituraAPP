@@ -6,6 +6,8 @@ const { validatePagination } = require('../utils/pagination');
 class OcorrenciaController {
   // Criar nova ocorrência
   async create(req, res) {
+    let uploadedPhotos = []; // Mover para escopo da função para permitir acesso no catch
+
     try {
       const { titulo, descricao, categoria, endereco, latitude, longitude, prioridade } = req.body;
       const vereadorId = req.userId;
@@ -16,7 +18,6 @@ class OcorrenciaController {
       }
 
       // Upload das fotos primeiro (antes da transação)
-      let uploadedPhotos = [];
       if (req.files && req.files.length > 0) {
         const uploadPromises = req.files.map(file => uploadService.uploadImage(file));
         uploadedPhotos = await Promise.all(uploadPromises);

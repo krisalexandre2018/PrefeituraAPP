@@ -63,6 +63,15 @@ class AuthController {
   // Login
   async login(req, res) {
     try {
+      // Validar erros do express-validator
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          error: errors.array()[0].msg,
+          errors: errors.array()
+        });
+      }
+
       const { email, senha } = req.body;
 
       // Buscar usuário
