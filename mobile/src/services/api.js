@@ -33,13 +33,24 @@ const api = axios.create({
   }
 });
 
-// Interceptor para adicionar token automaticamente
+// Interceptor para adicionar token JWT e CSRF automaticamente
 api.interceptors.request.use(
   async (config) => {
+    // Adicionar token JWT
     const token = await AsyncStorage.getItem('@auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Adicionar token CSRF para métodos de modificação (POST, PUT, PATCH, DELETE)
+    const modifyMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+    if (modifyMethods.includes(config.method?.toUpperCase())) {
+      const csrfToken = await AsyncStorage.getItem('@csrf_token');
+      if (csrfToken) {
+        config.headers['x-csrf-token'] = csrfToken;
+      }
+    }
+
     return config;
   },
   (error) => {
@@ -47,23 +58,53 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para tratar erros de autenticação
+// Interceptor para tratar erros de autenticação e CSRF
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const originalRequest = error.config;
+
+    // Erro 401 - Token JWT inválido ou expirado
     if (error.response?.status === 401) {
-      // Token inválido ou expirado - limpar dados locais
       await AsyncStorage.removeItem('@auth_token');
       await AsyncStorage.removeItem('@user');
+      await AsyncStorage.removeItem('@csrf_token');
 
-      // Notificar AuthContext para atualizar estado
       if (onUnauthorizedCallback) {
         onUnauthorizedCallback();
       }
     }
+
+    // Erro 403 - Pode ser token CSRF inválido/expirado
+    if (error.response?.status === 403 && error.response?.data?.error?.includes('CSRF')) {
+      // Tentar obter novo token CSRF e refazer requisição (apenas 1 vez)
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+
+        const newCsrfToken = await getCsrfToken();
+        if (newCsrfToken) {
+          originalRequest.headers['x-csrf-token'] = newCsrfToken;
+          return api(originalRequest);
+        }
+      }
+    }
+
     return Promise.reject(error);
   }
 );
+
+// Função auxiliar para obter token CSRF
+export const getCsrfToken = async () => {
+  try {
+    const response = await api.get('/csrf/token');
+    const csrfToken = response.data.csrfToken;
+    await AsyncStorage.setItem('@csrf_token', csrfToken);
+    return csrfToken;
+  } catch (error) {
+    console.warn('Erro ao obter token CSRF:', error.message);
+    return null;
+  }
+};
 
 // Serviço de Autenticação
 export const authService = {
@@ -77,6 +118,9 @@ export const authService = {
     if (response.data.token) {
       await AsyncStorage.setItem('@auth_token', response.data.token);
       await AsyncStorage.setItem('@user', JSON.stringify(response.data.user));
+
+      // Buscar token CSRF após login
+      await getCsrfToken();
     }
     return response.data;
   },
@@ -84,6 +128,7 @@ export const authService = {
   logout: async () => {
     await AsyncStorage.removeItem('@auth_token');
     await AsyncStorage.removeItem('@user');
+    await AsyncStorage.removeItem('@csrf_token');
   },
 
   getMe: async () => {
