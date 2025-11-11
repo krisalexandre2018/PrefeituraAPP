@@ -24,7 +24,7 @@ INSERT INTO users (
   'Administrador',
   '00000971409',
   'kris.alexandre2018@gmail.com',
-  '$2a$10$YQvE5z5K5Z5Z5Z5Z5Z5Z5.rJ5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5',
+  '$2a$10$N9qo8uLOickgx2ZMRZoMye1J.IVI7XvZQqXh9YJvVQYVv.FqP4pPG',
   '(00) 00000-0000',
   'ADMIN',
   'ATIVO',
