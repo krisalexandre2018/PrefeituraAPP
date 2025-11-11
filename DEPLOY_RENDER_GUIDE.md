@@ -111,12 +111,14 @@ Quando terminar, você vai ver várias URLs. **COPIE** as seguintes:
 **Internal Database URL** (Mais importante!)
 ```
 postgresql://vereadores_user:senha@dpg-xxxxx-a/vereadores_db
+postgresql://vereadores_db:iA5c25aegP01FsaBzluqiDs4pY2dmX4d@dpg-d488t2chg0os7384l8sg-a/vereadores_db
 ```
 👆 **GUARDE ESTA URL!** Vamos usar no próximo passo.
 
 **External Database URL**
 ```
 postgresql://vereadores_user:senha@dpg-xxxxx-a.oregon-postgres.render.com/vereadores_db
+postgresql://vereadores_db:iA5c25aegP01FsaBzluqiDs4pY2dmX4d@dpg-d488t2chg0os7384l8sg-a.oregon-postgres.render.com/vereadores_db
 ```
 
 ---
